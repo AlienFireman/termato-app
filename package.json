@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3002",
-    "build": "env -u TURBOPACK NODE_PATH=\"$PWD/node_modules\" next build --webpack",
+    "build": "env -u TURBOPACK -u __NEXT_PROCESSED_ENV NODE_PATH=\"$PWD/node_modules\" next build --webpack",
     "start": "next start --port 3002",
     "set-password": "node scripts/set-password.js",
     "release": "node scripts/release.js"
