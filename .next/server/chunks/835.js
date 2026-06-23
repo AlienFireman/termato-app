@@ -73,7 +73,7 @@ export CLICOLOR=1
 # Fallback colour prompt for systems where ~/.zshrc didn't configure one.
 autoload -U colors && colors 2>/dev/null
 if [[ "\${PROMPT}\${PS1}" != *$'\\033'* && "\${PROMPT}\${PS1}" != *'%F'* && "\${PROMPT}\${PS1}" != *'%{'* ]]; then
-  PROMPT='%F{green}%n@%m%f:%F{blue}%~%f%# '
+  PROMPT='%B%F{green}%n@%m%f%b:%B%F{blue}%~%f%b%# '
 fi
 alias ls='ls --color=auto' 2>/dev/null
 alias grep='grep --color=auto' 2>/dev/null
