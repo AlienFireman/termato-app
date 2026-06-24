@@ -77,6 +77,13 @@ if [[ "\${PROMPT}\${PS1}" != *$'\\033'* && "\${PROMPT}\${PS1}" != *'%F'* && "\${
 fi
 alias ls='ls --color=auto' 2>/dev/null
 alias grep='grep --color=auto' 2>/dev/null
+# Drop zsh's partial-line "%" EOL marker (PROMPT_SP, on by default): it prints a
+# reverse-video '%' + redraw before each prompt to preserve a line that didn't end in a
+# newline. In the block terminal every command is its own block, so the marker is
+# pointless — and at startup / after a soft clear it forms an empty leading block that
+# pushes the first prompt down the page (bash has no such marker). Unsetting it aligns
+# the zsh starting prompt with bash's, just below the header.
+unsetopt PROMPT_SP 2>/dev/null
 # OSC 133 command marks (block engine) via preexec/precmd hooks, plus command capture.
 __termato_cmdmark() {
   local cmd="\${1:-$(fc -ln -1 2>/dev/null)}"
