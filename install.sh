@@ -340,8 +340,13 @@ else
   npm run build >>"$LOG" 2>&1 || logfail "Build failed"
 fi
 
-# Frameable auto-refreshing placeholder served while a dev server is still booting.
-SPINNER_HTML='<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="2"><title>Starting server…</title><style>html,body{height:100%;margin:0}body{display:flex;align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif;background:#0b0b0c;color:#9aa0a6;font-size:14px}.s{display:flex;gap:10px;align-items:center}.d{width:14px;height:14px;border:2px solid #2a2a2e;border-top-color:#6366f1;border-radius:50%;animation:r .8s linear infinite}@keyframes r{to{transform:rotate(360deg)}}</style></head><body><div class="s"><div class="d"></div>Starting server…</div></body></html>'
+# Frameable holding page served by handle_errors when the band port has no listener.
+# Caddy can't tell "server still booting" from "nothing running at all" (both are just a
+# failed proxy), so this must NOT claim a server is starting — it is a neutral tomato
+# holding page that quietly auto-refreshes, so it transparently upgrades to the live
+# preview the moment a server does start. (No apostrophes/backticks: bash single-quote +
+# Caddy backtick-delimited body.)
+HOLD_HTML='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="refresh" content="3"><title>Termato preview</title><style>html,body{height:100%;margin:0}body{display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center;font-family:system-ui,-apple-system,sans-serif;background:#0b0b0c;color:#8a8f98;font-size:14px;text-align:center;padding:24px;box-sizing:border-box}.t{font-size:72px;line-height:1;filter:drop-shadow(0 6px 16px rgba(229,57,53,.4))}.h{color:#e8eaed;font-size:17px;font-weight:600}.s{max-width:320px;line-height:1.5;opacity:.85}</style></head><body><div class="t">🍅</div><div class="h">No preview running</div><div class="s">There is nothing to display here yet. This page will update by itself as soon as a preview server starts.</div></body></html>'
 
 if [ "$INSTALL_TYPE" = "tunnel" ]; then
   # ── 7t. Private Caddy (own pm2 process, high localhost port — never system Caddy) ──
@@ -412,7 +417,7 @@ if [ "$INSTALL_TYPE" = "tunnel" ]; then
       printf '\t\theader Content-Security-Policy "frame-ancestors https://%s"\n' "$APP_HOST"
       printf '\t\theader -X-Frame-Options\n'
       printf '\t\theader Cache-Control "no-store, no-cache, must-revalidate"\n'
-      printf '\t\trespond 200 {\n\t\t\tbody `%s`\n\t\t}\n' "$SPINNER_HTML"
+      printf '\t\trespond 200 {\n\t\t\tbody `%s`\n\t\t}\n' "$HOLD_HTML"
       printf '\t}\n}\n\n'
     done
   } > "$CADDYFILE"
@@ -486,7 +491,7 @@ ${HOSTS} {
 		header -X-Frame-Options
 		header Cache-Control "no-store, no-cache, must-revalidate"
 		respond 200 {
-			body \`${SPINNER_HTML}\`
+			body \`${HOLD_HTML}\`
 		}
 	}
 }
